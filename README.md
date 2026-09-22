@@ -44,8 +44,8 @@ Open PowerShell:
 
 ```powershell
 Set-Location ([Environment]::GetFolderPath("MyDocuments"))
-git clone https://github.com/DevSkits916/Playwright-PasteHappy.git PasteHappy
-Set-Location PasteHappy
+git clone https://github.com/DevSkits916/PasteHappy-Python.git
+Set-Location PasteHappy-Python
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -72,8 +72,8 @@ npm run build
 ## Linux or WSL installation
 
 ```bash
-git clone https://github.com/DevSkits916/Playwright-PasteHappy.git PasteHappy
-cd PasteHappy
+git clone https://github.com/DevSkits916/PasteHappy-Python.git
+cd PasteHappy-Python
 
 python3 -m venv .venv
 source .venv/bin/activate
@@ -104,7 +104,7 @@ Keep the minimized **PasteHappy Server** window running while using the app. Clo
 ### Manual startup
 
 ```powershell
-Set-Location "$env:USERPROFILE\Documents\PasteHappy"
+Set-Location "$env:USERPROFILE\Documents\PasteHappy-Python"
 .\.venv\Scripts\python.exe app.py
 ```
 
@@ -348,4 +348,4 @@ The Python tests cover CSV normalization, queue persistence and recovery, duplic
 
 Created by [DevSkits916](https://github.com/DevSkits916).
 
-Repository: [Playwright-PasteHappy](https://github.com/DevSkits916/Playwright-PasteHappy).
+Repository: [PasteHappy-Python](https://github.com/DevSkits916/PasteHappy-Python).
