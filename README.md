@@ -1,4 +1,4 @@
-<img width="1352" height="719" alt="Screenshot 2026-09-13 153514" src="https://github.com/user-attachments/assets/3807eed8-92e6-4610-8745-87888caedeb3" />
+
 # PasteHappy + Playwright
 
 PasteHappy is a mobile-friendly Facebook group posting assistant with two workspaces:
