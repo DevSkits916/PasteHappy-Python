@@ -4,18 +4,16 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k \"node --watch server/index.js\" \"vite\"",
+    "dev": "concurrently -k \"python app.py\" \"vite\"",
     "dev:web": "vite",
     "build": "tsc -b && vite build",
-    "start": "node server/index.js",
-    "test": "node --test",
+    "start": "python app.py",
+    "test": "python -m unittest discover -s tests_python -v",
     "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "express": "^4.21.2",
-    "playwright": "^1.59.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.21",

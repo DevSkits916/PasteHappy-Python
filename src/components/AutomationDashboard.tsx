@@ -9,7 +9,7 @@ const blankStatus: WorkerStatus = { state: 'offline', currentJob: null, currentS
 export function AutomationDashboard({ rows }: { rows: ParsedCsvRow[] }) {
   const [jobs, setJobs] = useState<Job[]>([]); const [status, setStatus] = useState(blankStatus); const [error, setError] = useState('');
   const [settings, setSettings] = useState({ delayMs: 15000, cooldownMs: 0, maxJobs: 10, stopOnFailure: false, stopOnCheckpoint: true, headless: false });
-  const refresh = useCallback(async () => { try { const [queue, state] = await Promise.all([api('/api/queue'), api('/api/status')]); setJobs(queue); setStatus(state); setError(''); } catch { setError('Automatic posting backend is offline. Start it with npm start.'); } }, []);
+  const refresh = useCallback(async () => { try { const [queue, state] = await Promise.all([api('/api/queue'), api('/api/status')]); setJobs(queue); setStatus(state); setError(''); } catch { setError('Automatic posting backend is offline. Start it with python app.py.'); } }, []);
   useEffect(() => { refresh(); const timer = window.setInterval(refresh, 2000); return () => window.clearInterval(timer); }, [refresh]);
   const counts = useMemo(() => Object.fromEntries(['pending', 'processing', 'posted', 'failed', 'blocked', 'uncertain'].map((key) => [key, jobs.filter((job) => job.status === key).length])), [jobs]);
   const command = async (path: string, body: unknown = {}) => { try { await api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); await refresh(); } catch (e) { setError((e as Error).message); } };

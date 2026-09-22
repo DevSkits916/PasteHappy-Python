@@ -1,83 +1,185 @@
+# PasteHappy + Playwright
 
+PasteHappy is a mobile-friendly Facebook group posting assistant with two workspaces:
 
-# Paste Happy
-<img width="1352" height="719" alt="Screenshot 2026-09-13 153514" src="https://github.com/user-attachments/assets/3c2bb229-5fb9-498c-a30e-649df709dffd" />
+- **Manual window:** import a CSV, review or edit posts, copy text, open a group, and track progress.
+- **Automation window:** queue the imported rows, configure pacing, run Playwright, and monitor results.
 
+The application uses a Python backend with Flask, Waitress, and Python Playwright. The responsive interface is built with React, Vite, and Tailwind.
 
+> Use PasteHappy only for content you are allowed to publish. Respect group rules and Facebook's terms. Facebook can change its UI or request security checks at any time. Review an `uncertain` result manually before retrying to avoid duplicate posts.
 
-Paste Happy is a mobile-friendly Facebook group posting assistant. It preserves the original **manual** CSV → **Copy & Open** → **Mark Posted** workflow and adds an opt-in, persistent Playwright queue that works through the normal Facebook website UI (not the Graph API).
+## Features
 
-************************************************************************************************************************
-Use responsibly. Only post content you are permitted to post, respect group rules and Facebook's terms, and use conservative delays. UI automation is inherently brittle: Facebook can change labels, dialogs, or security checks at any time. An `uncertain` result must be reviewed manually before retrying to avoid a duplicate post.
-**************************************************************************************************************************
-Chrome Extension for sraping facebook group names and urls to csv download zip of extension. extract and load through chrome -----> Extensions  (enable Developer mode) and install as unpacked extension 
-<img width="931" height="593" alt="Screenshot 2026-09-13 190347" src="https://github.com/user-attachments/assets/86097bee-87be-459b-8516-068709c39bd6" />
-## Architecture
+### Manual workspace
 
-- **Frontend:** the existing React/Vite/Tailwind application; its manual queue remains in browser `localStorage`.
-- **Backend:** Express API and an atomic JSON queue at `data/queue.json`.
-- **Worker:** one Playwright worker using a persistent Chromium profile in `.browser-profile`.
-- **Automation:** semantic role/text locators and centralized fallbacks in `automation/selectors.js`.
+- CSV import and sample download
+- Editable post text
+- Copy & Open, Mark Posted, and Skip actions
+- Search, status filters, shuffle, and temporary undo
+- Browser-local session persistence
+- Responsive desktop and mobile layouts
 
-GitHub Pages and Vercel static hosting cannot run the backend or persistent browser. The full automatic workflow is intended to run locally on the Windows computer where Chromium can be displayed. A hosted headless service is not a substitute for the initial interactive Facebook login and generally cannot provide a reliable persistent desktop session.
+### Automation workspace
 
-## Windows installation (clean checkout)
+- Separate dashboard window
+- Persistent JSON job queue
+- Persistent Facebook browser profile
+- Visible or headless Playwright operation
+- Delay, cooldown, and maximum-job controls
+- Pause, resume, stop, retry, skip, and clear actions
+- Current job, step, attempts, and error reporting
+- Duplicate protection and interrupted-job recovery
 
-Install [Git for Windows](https://git-scm.com/download/win) and the current Node.js LTS release, then open **PowerShell**:
+## Requirements
+
+- Python 3.11 or newer
+- Node.js 20 or newer to build the React frontend
+- npm
+- Git
+
+## Windows installation
+
+Open PowerShell:
 
 ```powershell
-git clone https://github.com/DevSkits916/Paste-happy-.git
-Set-Location Paste-happy-
-npm install
-npx playwright install chromium
+Set-Location ([Environment]::GetFolderPath("MyDocuments"))
+git clone https://github.com/DevSkits916/Playwright-PasteHappy.git PasteHappy
+Set-Location PasteHappy
+
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m playwright install chromium
+
+npm ci
 npm run build
-npm start
+python app.py
 ```
 
-Open <http://localhost:4173>. No compiled application or binary is committed; npm installs every JavaScript dependency from `package-lock.json`, and the Playwright command downloads the matching Chromium build. On Windows, no Linux `--with-deps` flag is needed.
+Open <http://localhost:4173> and keep the PowerShell window running.
 
-For development (Express and Vite together):
+If PowerShell blocks the activation script, use the virtual environment directly:
 
 ```powershell
-npm run dev
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m playwright install chromium
+npm ci
+npm run build
+.\.venv\Scripts\python.exe app.py
 ```
 
-Vite opens on <http://localhost:5173> and proxies `/api` to Express on port 4173. `npm start` serves the already-built `dist` UI and API from one process.
+## Linux or WSL installation
 
-## Facebook login and browser profile
+```bash
+git clone https://github.com/DevSkits916/Playwright-PasteHappy.git PasteHappy
+cd PasteHappy
 
-1. Keep the server running and select **Open Browser / Login** in Paste Happy.
-2. A Playwright-managed Chromium window opens at Facebook. Log in manually and complete any security prompts yourself.
-3. Leave that window available while running the queue. Later runs reuse `.browser-profile`.
-4. Never copy, upload, or commit `.browser-profile`; it contains sensitive session data. Paste Happy never returns cookies through its API.
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m playwright install --with-deps chromium
 
-Headless mode cannot perform the first interactive login. The application deliberately does not automate credentials, CAPTCHA, checkpoints, or two-factor authentication.
+npm ci
+npm run build
+python app.py
+```
 
-## Queue usage
+Visible login requires a working graphical desktop or WSLg session.
 
-1. Import the same CSV used by the manual workspace and review/edit its rows.
-2. Select **Queue for Automatic Posting**. Exact URL + post-text duplicates already in the active queue are ignored.
-3. Configure delay, cooldown, maximum jobs, stop-on-failure, and stop-on-checkpoint. Defaults are deliberately conservative.
-4. Open/login to the browser, then select **Start**. You can **Pause**, **Resume**, or **Stop** without losing persisted jobs.
-5. The worker opens each group, detects login/security blocks, opens the composer, fills the post, submits, and verifies the composer closed or the text appeared.
-6. Review `failed`, `blocked`, and especially `uncertain` jobs. Retry is always manual for these states; uncertain jobs are never automatically selected again.
+## Starting an existing installation
 
-The dashboard shows total, pending, processing, posted, failed, blocked, and uncertain counts, the current step, attempts, last error, and per-job Retry/Skip/Open Group actions. A server restart safely converts a job left in `processing` to `failed` rather than silently claiming success.
+### One-click Windows launcher
 
-## Manual fallback
+Double-click `Deploy-and-Open-PasteHappy.bat` in the project folder. It will:
 
-The original workflow remains available on desktop and phones:
+1. Create the Python virtual environment when needed.
+2. Install the packages from `requirements.txt`.
+3. Install the Playwright Chromium browser.
+4. Install and build the web interface.
+5. Start the Python server and open PasteHappy in your default browser.
 
-1. Import a CSV.
-2. Select a row and use **Copy & Open**.
-3. Paste and publish in Facebook yourself.
-4. Return to Paste Happy and select **Mark Posted** (or Skip). Local filters, editing, shuffle, undo, progress, and the sample/download tools remain available.
+Keep the minimized **PasteHappy Server** window running while using the app. Close that window or press `Ctrl+C` inside it to stop the server.
+
+### Manual startup
+
+```powershell
+Set-Location "$env:USERPROFILE\Documents\PasteHappy"
+.\.venv\Scripts\python.exe app.py
+```
+
+The server listens on <http://localhost:4173> by default. Press `Ctrl+C` to stop it.
+
+`npm start` is also available and runs `python app.py`, but the direct virtual-environment command guarantees the correct Python dependencies are used.
+
+## Manual mode
+
+1. Open the main PasteHappy window.
+2. Select **Import CSV**.
+3. Review or edit the imported post text.
+4. Choose **Copy & Open** for a row.
+5. Paste and publish the message in Facebook.
+6. Return to PasteHappy and choose **Mark Posted** or **Skip**.
+
+Manual rows are stored in the current browser's `localStorage`. Clearing site data or changing browsers, profiles, or origins creates a different manual session.
+
+## Automation mode
+
+1. Import and review the CSV in the manual window.
+2. Select **Open Playwright Automation**.
+3. Allow popups for PasteHappy if the second window is blocked.
+4. Select **Queue Manual CSV**.
+5. Configure the delay, cooldown, job limit, and stop behavior.
+6. Complete the initial Facebook login in visible mode.
+7. Select **Start**.
+
+The automation window reads the manual session when it opens. Reload it after changing manual rows.
+
+The manual queue and automation queue are separate. An automated result does not automatically change the matching manual row.
+
+### Run controls
+
+- **Start:** process pending jobs using the selected settings.
+- **Pause:** pause before another job begins.
+- **Resume:** continue a paused run.
+- **Stop:** request that the worker stop.
+- **Skip Current & Continue:** skip the active job and close its browser work.
+- **Clear Automation Queue:** remove automation jobs and close the Playwright browser.
+
+### Statuses
+
+| Status | Meaning |
+| --- | --- |
+| `pending` | Waiting to run |
+| `processing` | Claimed by the worker |
+| `posted` | Posting success was detected |
+| `failed` | Browser or posting error |
+| `blocked` | Login or security condition blocked progress |
+| `uncertain` | Submission may have happened but could not be verified |
+| `skipped` | Skipped by the user |
+
+Failed, blocked, uncertain, and skipped jobs require an explicit retry.
+
+## Facebook login and headless mode
+
+Use visible mode for the initial login:
+
+1. Leave **Run browser headless** unchecked.
+2. Select **Open Visible Browser / Login**.
+3. Log in and complete any security prompts manually.
+4. Leave the managed browser available while running a visible queue.
+
+The session is saved under `.browser-profile` and reused. This directory contains sensitive account session data; never commit, upload, or share it.
+
+After a successful visible login, you may close the Playwright browser, enable **Run browser headless**, and start a later queue. Mode changes are blocked while a managed browser is open.
+
+Headless mode cannot complete interactive login, CAPTCHA, two-factor authentication, or checkpoints. It does not bypass Facebook security controls.
 
 ## CSV format
 
-The importer handles quoted commas/newlines, BOMs, and these case-insensitive headings:
+The importer supports UTF-8 BOMs, quoted commas, quoted newlines, and case-insensitive headings.
 
-| Value | Accepted examples |
+| Value | Accepted headings |
 | --- | --- |
 | Group | `Group Name`, `group_name`, `group`, `name` |
 | URL | `Group URL`, `group_url`, `url`, `link` |
@@ -85,53 +187,165 @@ The importer handles quoted commas/newlines, BOMs, and these case-insensitive he
 
 ```csv
 Group Name,Group URL,Post
-Folsom Community,https://www.facebook.com/groups/355271864659430/,"Hello neighbors"
+Example Community,https://www.facebook.com/groups/123456789/,"Hello neighbors"
 ```
+
+## Development
+
+Install both Python and frontend dependencies, then run:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+npm run dev
+```
+
+Vite runs at <http://localhost:5173> and proxies `/api` to the Python server at <http://localhost:4173>.
+
+| Command | Purpose |
+| --- | --- |
+| `python app.py` | Run the production Python server |
+| `npm run dev` | Run Python and Vite development servers |
+| `npm run dev:web` | Run only Vite |
+| `npm run build` | Type-check and build the frontend |
+| `npm test` | Run the Python test suite |
+| `npm run preview` | Preview only the static frontend build |
 
 ## Configuration
 
-Copy `.env.example` values into your shell or system environment before starting. Node does not implicitly load `.env`; PowerShell examples are `$env:PORT="4173"` and `$env:PLAYWRIGHT_HEADLESS="false"`.
+The application reads environment variables directly. It does not automatically load `.env`.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `PORT` | `4173` | Express port |
+| `PORT` | `4173` | HTTP port |
 | `QUEUE_DATA_PATH` | `data/queue.json` | Persistent queue file |
-| `BROWSER_PROFILE_PATH` | `.browser-profile` | Private Chromium profile |
-| `PLAYWRIGHT_HEADLESS` | `false` | Use a visible browser; recommended for Facebook |
-| `PLAYWRIGHT_EXECUTABLE_PATH` | unset | Optional path to a Chromium/Chrome executable; Windows automatically falls back to installed Google Chrome if Playwright's bundled browser is unavailable |
-| `DEFAULT_JOB_DELAY` | `15000` | Milliseconds between jobs |
-| `MAX_JOBS_PER_RUN` | `10` | Conservative run cap |
+| `BROWSER_PROFILE_PATH` | `.browser-profile` | Persistent Chromium profile |
+| `PLAYWRIGHT_HEADLESS` | `false` | Initial browser mode |
+| `PLAYWRIGHT_EXECUTABLE_PATH` | unset | Optional Chromium or Chrome executable |
+| `DEFAULT_JOB_DELAY` | `15000` | Default delay in milliseconds |
+| `MAX_JOBS_PER_RUN` | `10` | Default job limit |
+
+PowerShell example:
+
+```powershell
+$env:PORT = "4173"
+$env:PLAYWRIGHT_HEADLESS = "false"
+.\.venv\Scripts\python.exe app.py
+```
+
+## Project structure
+
+```text
+app.py                    Python entry point
+pastehappy/
+  browser.py              Playwright lifecycle and persistent profile
+  clipboard.py            Windows clipboard helper
+  config.py               Environment configuration
+  csv_parser.py           CSV normalization
+  facebook.py             Facebook posting workflow
+  queue_store.py          Atomic persistent queue
+  web.py                  Flask API and frontend serving
+  worker.py               Queue execution and controls
+src/                      React frontend
+public/                   Static assets
+tests_python/             Python tests
+requirements.txt          Python dependencies
+data/                     Private runtime queue data
+.browser-profile/         Private browser session data
+dist/                     Generated frontend build
+```
+
+The older JavaScript backend is available in Git history. The current application starts from `app.py` and uses the `pastehappy` Python package.
 
 ## API
 
-`GET /api/queue`, `GET /api/queue/:id`, `POST /api/queue/import`, `POST /api/queue/start`, `/pause`, `/resume`, `/stop`, `POST /api/queue/:id/retry`, `POST /api/queue/:id/skip`, `GET /api/status`, and `POST /api/browser/login` are available. Queue state belongs to the backend, so a UI refresh does not reset it.
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/status` | Worker and browser status |
+| GET | `/api/queue` | List jobs |
+| GET | `/api/queue/:id` | Get a job |
+| POST | `/api/queue/import` | Import CSV or normalized rows |
+| POST | `/api/queue/start` | Start a run |
+| POST | `/api/queue/pause` | Pause the worker |
+| POST | `/api/queue/resume` | Resume the worker |
+| POST | `/api/queue/stop` | Stop after current work yields |
+| POST | `/api/queue/clear` | Clear jobs and close the browser |
+| POST | `/api/queue/current/skip` | Skip the current job |
+| POST | `/api/queue/:id/retry` | Retry a job |
+| POST | `/api/queue/:id/skip` | Skip a job |
+| POST | `/api/browser/login` | Open visible Facebook login |
 
 ## Deployment
 
-- **Recommended/full functionality:** run locally on Windows using the commands above. Back up `data/queue.json` privately if needed.
-- **Render:** `render.yaml` now describes the Node web service and persistent queue disk. Set `QUEUE_DATA_PATH=/opt/render/project/src/data/queue.json` and `PLAYWRIGHT_HEADLESS=true`. However, Render cannot provide the normal visible desktop needed for manual login, and Facebook may challenge datacenter browsers. Treat this as API/UI deployment, not a guaranteed automation environment.
-- **Static hosting:** `npm run build` still produces a single-file-friendly `dist` UI, and the manual workflow works when statically hosted. Automatic controls show an offline notice because GitHub Pages/Vercel cannot execute Express or Playwright.
+Local Windows execution is recommended because the initial Facebook login requires an interactive browser.
+
+`render.yaml` uses the Python runtime, installs `requirements.txt`, builds the React frontend, and installs Chromium. Hosted datacenter browsers may be challenged by Facebook, and the configured persistent disk stores the queue rather than the browser profile. Treat hosted automation as experimental.
+
+Static hosting can serve the manual frontend, but it cannot run Flask, persist the backend queue, or launch Playwright.
+
+Do not expose the Python server publicly without adding authentication and appropriate network controls.
 
 ## Troubleshooting
 
-- **Executable missing:** run `npx playwright install chromium` from the repository.
-- **Automatic backend offline:** use `npm start` after `npm run build`, not a static file server.
-- **Login required/checkpoint/CAPTCHA:** pause, use **Open Browser / Login**, resolve the Facebook prompt manually, then manually retry the affected item.
-- **Composer/button not found:** Facebook likely changed its UI or group permissions. Use Copy & Open and update centralized fallbacks in `automation/selectors.js`.
-- **Uncertain:** inspect the group before retrying. The click may have succeeded even though verification did not.
-- **Profile locked:** close other Playwright Chromium instances using this profile, then restart Paste Happy.
-- **Windows firewall prompt:** allow Node.js for private networks if you want to open the UI from another device; do not expose the server publicly without adding authentication.
+### Local connection refused
 
-## Security
+Start the Python server and keep its terminal open:
 
-The local server has no user authentication and is intended for a trusted computer/network. Do not expose it directly to the internet. Queue text is stored unencrypted in JSON, while Facebook cookies remain in the ignored browser-profile directory. Logs contain job IDs and steps, never credentials or cookies. Keep dependencies updated and stop the server/browser when finished.
+```powershell
+.\.venv\Scripts\python.exe app.py
+```
+
+### Missing Python package
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+### Browser executable missing
+
+```powershell
+.\.venv\Scripts\python.exe -m playwright install chromium
+```
+
+### Automation backend offline
+
+`npm run preview`, `npm run dev:web`, and static hosting do not start the Python API. Use `python app.py` or `npm run dev`.
+
+### Automation window does not open
+
+Allow popups for the PasteHappy origin and try again.
+
+### Login, CAPTCHA, or checkpoint required
+
+Stop the run, switch to visible mode, and resolve the prompt manually. Check the affected group before retrying.
+
+### Uncertain posting result
+
+Inspect the group manually before retrying. The submission may have succeeded.
+
+### Browser profile locked
+
+Close other browser instances using the PasteHappy profile, then restart the Python server.
 
 ## Validation
 
 ```powershell
-npm test
+.\.venv\Scripts\python.exe -m unittest discover -s tests_python -v
 npm run build
-npm start
 ```
 
-Tests cover CSV normalization, queue creation and transitions, persistence and restart recovery, duplicate protection, retry/uncertain behavior, failure continuation, and API endpoints.
+The Python tests cover CSV normalization, queue persistence and recovery, duplicate handling, state transitions, and API behavior.
+
+## Security
+
+- The local API has no authentication.
+- Queue content is stored unencrypted in JSON.
+- Facebook session data is stored in `.browser-profile`.
+- Never commit profiles, credentials, `.env`, or private queue data.
+- Use the application only on a trusted machine and network.
+- Stop the server and managed browser when finished.
+
+## Credits
+
+Created by [DevSkits916](https://github.com/DevSkits916).
+
+Repository: [Playwright-PasteHappy](https://github.com/DevSkits916/Playwright-PasteHappy).
