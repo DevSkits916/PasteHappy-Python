@@ -13,3 +13,6 @@ test-results/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+build/
+releases/
+*.spec

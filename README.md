@@ -33,6 +33,14 @@ The application uses a Python backend with Flask, Waitress, and Python Playwrigh
 - Current job, step, attempts, and error reporting
 - Duplicate protection and interrupted-job recovery
 
+## Windows executable
+
+Download `PasteHappy.exe` from [GitHub releases](https://github.com/DevSkits916/PasteHappy-Python/releases) and double-click it. The dashboard opens automatically. Keep the console window open; press Ctrl+C to stop. Python and Node.js are not required. Install Microsoft Edge or Google Chrome for Facebook automation, then log in manually through PasteHappy.
+
+The executable saves its queue and Facebook profile under `%LOCALAPPDATA%\PasteHappy`. Existing source-folder data is preserved and is not automatically copied into this separate profile. Manual workspace data remains in your dashboard browser's local storage.
+
+Build from source on Windows with `.\build.ps1`. The result is `releases\PasteHappy.exe`; build dependencies are in `requirements-build.txt`. The executable serves the dashboard on localhost only.
+
 ## Requirements
 
 - Python 3.11 or newer

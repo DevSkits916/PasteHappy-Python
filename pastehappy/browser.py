@@ -100,6 +100,8 @@ class BrowserManager:
         if os.name != "nt":
             return None
         candidates = [
+            Path(os.environ.get("PROGRAMFILES(X86)", "")) / "Microsoft/Edge/Application/msedge.exe",
+            Path(os.environ.get("PROGRAMFILES", "")) / "Microsoft/Edge/Application/msedge.exe",
             Path(os.environ.get("PROGRAMFILES", "")) / "Google/Chrome/Application/chrome.exe",
             Path(os.environ.get("PROGRAMFILES(X86)", "")) / "Google/Chrome/Application/chrome.exe",
             Path(os.environ.get("LOCALAPPDATA", "")) / "Google/Chrome/Application/chrome.exe",
