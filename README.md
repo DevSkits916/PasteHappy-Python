@@ -2,6 +2,11 @@
 
 # PasteHappy + Playwright
 
+
+use this for groups CSV
+
+https://github.com/DevSkits916/FacebookGroupScanner/releases/tag/v1.0.0
+
 PasteHappy is a mobile-friendly Facebook group posting assistant with two workspaces:
 
 - **Manual window:** import a CSV, review or edit posts, copy text, open a group, and track progress.
