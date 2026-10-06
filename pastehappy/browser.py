@@ -45,6 +45,8 @@ class BrowserManager:
 
     def set_headless(self, value: bool) -> None:
         next_headless = bool(value)
+        if os.environ.get("RENDER") and not next_headless:
+            raise RuntimeError("Render requires headless mode. Use the local PasteHappy app for visible Facebook login.")
         if self.is_open and self.headless != next_headless:
             raise RuntimeError("Close the current Playwright browser before changing headless mode.")
         self.headless = next_headless

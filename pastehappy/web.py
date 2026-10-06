@@ -89,7 +89,7 @@ def create_app(*, store, worker, browser, root: Path | str) -> Flask:
 
     @app.get("/api/status")
     def get_status():
-        return jsonify(**worker.status(), browser={
+        return jsonify(**worker.status(), hosted=bool(os.environ.get("RENDER")), browser={
             "profileExists": browser.exists(), "open": browser.is_open, "headless": browser.headless,
         })
 
