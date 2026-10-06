@@ -1,4 +1,5 @@
-<img width="1361" height="710" alt="Screenshot 2026-09-30 072633" src="https://github.com/user-attachments/assets/5ca81e53-d480-41a7-8e08-82a0c046d436" />
+<img width="1231" height="637" alt="Screenshot 2026-10-06 003414" src="https://github.com/user-attachments/assets/e0d6b673-48ef-4dce-b240-1b2114f14231" />
+
 
 # PasteHappy + Playwright
 
