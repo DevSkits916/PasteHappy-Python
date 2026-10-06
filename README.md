@@ -43,6 +43,10 @@ The executable saves its queue and Facebook profile under `%LOCALAPPDATA%\PasteH
 
 Build from source on Windows with `.\build.ps1`. The result is `releases\PasteHappy.exe`; build dependencies are in `requirements-build.txt`. The executable serves the dashboard on localhost only.
 
+The Windows executable uses installed Edge or Chrome; source runs use Playwright Chromium. Release downloads include `SHA256SUMS.txt` for integrity verification. The v1.0.1 executable is unsigned because a trusted publisher certificate is not configured, so Windows may display a reputation warning.
+
+To sign a future build with a trusted code-signing certificate installed in the current user's certificate store, run `.\build.ps1 -SigningCertificateThumbprint YOUR_CERTIFICATE_THUMBPRINT`. The build timestamps and verifies the signature before generating the checksum. Signing does not guarantee that a new download will immediately have SmartScreen reputation.
+
 ## Requirements
 
 - Python 3.11 or newer
@@ -137,10 +141,10 @@ Manual rows are stored in the current browser's `localStorage`. Clearing site da
 
 ## Automation mode
 
-1. Import and review the CSV in the manual window.
-2. Select **Open Playwright Automation**.
-3. Allow popups for PasteHappy if the second window is blocked.
-4. Select **Queue Manual CSV**.
+1. Select **Open Playwright Automation**.
+2. Allow popups for PasteHappy if the second window is blocked.
+3. Select **Import CSV** in the automation tab to import directly into its queue.
+4. Alternatively, import and review rows in the manual window, then select **Queue Manual CSV**.
 5. Configure the delay, cooldown, job limit, and stop behavior.
 6. Complete the initial Facebook login in visible mode.
 7. Select **Start**.
@@ -181,7 +185,7 @@ Use visible mode for the initial login:
 3. Log in and complete any security prompts manually.
 4. Leave the managed browser available while running a visible queue.
 
-The session is saved under `.browser-profile` and reused. This directory contains sensitive account session data; never commit, upload, or share it.
+The worker uses Playwright’s installed Chromium by default. The session is saved under `.browser-profile` and reused. This directory contains sensitive account session data; never commit, upload, or share it.
 
 After a successful visible login, you may close the Playwright browser, enable **Run browser headless**, and start a later queue. Mode changes are blocked while a managed browser is open.
 
@@ -263,7 +267,7 @@ The application reads environment variables directly. It does not automatically 
 | `QUEUE_DATA_PATH` | `data/queue.json` | Persistent queue file |
 | `BROWSER_PROFILE_PATH` | `.browser-profile` | Persistent Chromium profile |
 | `PLAYWRIGHT_HEADLESS` | `false` | Initial browser mode |
-| `PLAYWRIGHT_EXECUTABLE_PATH` | unset | Optional Chromium or Chrome executable |
+| `PLAYWRIGHT_EXECUTABLE_PATH` | unset | Optional explicit browser executable override; defaults to Playwright Chromium |
 | `DEFAULT_JOB_DELAY` | `15000` | Default delay in milliseconds |
 | `MAX_JOBS_PER_RUN` | `10` | Default job limit |
 
@@ -393,11 +397,11 @@ Created by [DevSkits916](https://github.com/DevSkits916).
 
 Repository: [PasteHappy-Python](https://github.com/DevSkits916/PasteHappy-Python).
 
-## Joining groups, timeout, and worker console
+## Joining groups and timeout
 
 Enable **Join group before posting** to click Join Group before looking for the composer. Enter **Automatic membership answers** as one `question phrase = answer` per line. Matching is case-insensitive; the longest matching phrase wins. For multiple-choice questions use the exact option text. Optional rule acceptance handles checkboxes labelled as agreement/rules. Supported forms include labelled text fields, radio groups, native selects, and checkboxes. The worker fills supported matching questions and submits the join form automatically. It never invents missing answers. Unknown questions, unsupported forms, and administrator approval are recorded as skipped for follow-up. Answers are saved in dashboard browser local storage, not committed to the repository.
 
-**Composer timeout** defaults to 15 seconds (1–120 configurable) and covers both locating the composer trigger and opening its text field. A timeout skips the group and continues even with Stop on failure enabled. Security checkpoints still honor the security stop setting. The top **Worker console** shows the latest 500 timestamped events, group names, errors, and delays; updates every two seconds and resets on server restart. Disable Follow latest to read older entries.
+**Composer timeout** defaults to 15 seconds (1–120 configurable) and covers both locating the composer trigger and opening its text field. A timeout skips the group and continues even with Stop on failure enabled. Security checkpoints still honor the security stop setting. The **Current job** section appears at the top of the automation tab, with Start, Pause, Resume, Stop, and Clear Automation Queue directly below it. Worker events remain available through `/api/status`.
 
 See [automation review](docs/automation-review.md) for prioritized findings and suggested features. Agreement answers default to `I agree` in the automation dashboard; edit or add question mappings as needed.
 

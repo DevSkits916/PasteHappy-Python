@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import sys
 import threading
 from concurrent.futures import Future
 from pathlib import Path
@@ -57,7 +58,9 @@ class BrowserManager:
         if not self._playwright:
             self._playwright = await async_playwright().start()
         self.profile_path.mkdir(parents=True, exist_ok=True)
-        executable = self.executable_path or self._system_chrome()
+        executable = self.executable_path or (self._system_chrome() if getattr(sys, "frozen", False) else None)
+        if getattr(sys, "frozen", False) and not executable:
+            raise RuntimeError("Install Microsoft Edge or Google Chrome, or set PLAYWRIGHT_EXECUTABLE_PATH, before opening the automation browser.")
         options = {"headless": self.headless, "no_viewport": True, "args": ["--start-maximized"]}
         if executable:
             options["executable_path"] = executable
