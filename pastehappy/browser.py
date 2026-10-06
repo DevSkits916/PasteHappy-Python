@@ -73,10 +73,10 @@ class BrowserManager:
         await page.goto("https://www.facebook.com/", wait_until="domcontentloaded")
         return {"opened": True}
 
-    async def post_job(self, job: dict, on_step):
+    async def post_job(self, job: dict, on_step, *, join_before_post=False, composer_timeout_ms=15000, membership_answers=None, accept_group_rules=False):
         context = await self.open()
         page = context.pages[0] if context.pages else await context.new_page()
-        return await post_to_facebook(page, job, on_step)
+        return await post_to_facebook(page, job, on_step, join_before_post=join_before_post, composer_timeout_ms=composer_timeout_ms, membership_answers=membership_answers, accept_group_rules=accept_group_rules)
 
     async def close(self) -> None:
         context, self.context = self.context, None

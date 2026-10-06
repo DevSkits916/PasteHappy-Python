@@ -1,10 +1,18 @@
 services:
   - type: web
-    name: fb-group-poster
-    env: python
-    buildCommand: pip install -r requirements.txt && npm ci --include=dev && npm run build && python -m playwright install chromium
+    name: pastehappy-python
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt && npm ci --include=dev && npm run build && python -m playwright install --with-deps chromium
     startCommand: python app.py
-    disk:
-      name: paste-happy-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.3
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: PLAYWRIGHT_HEADLESS
+        value: true
+      - key: DASHBOARD_PASSWORD
+        generateValue: true

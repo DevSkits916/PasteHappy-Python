@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hmac
+import os
 
 from flask import Flask, jsonify, request, send_from_directory
 
@@ -11,6 +13,23 @@ def create_app(*, store, worker, browser, root: Path | str) -> Flask:
     root = Path(root)
     dist = root / "dist"
     app = Flask(__name__, static_folder=None)
+
+    dashboard_password = os.environ.get("DASHBOARD_PASSWORD", "")
+    if os.environ.get("RENDER") and not dashboard_password:
+        raise RuntimeError("Set DASHBOARD_PASSWORD before exposing PasteHappy on Render.")
+
+    @app.before_request
+    def authenticate():
+        if request.path == "/healthz" or not dashboard_password:
+            return None
+        credentials = request.authorization
+        if not credentials or credentials.type.lower() != "basic" or not hmac.compare_digest((credentials.username or "").encode(), b"pastehappy") or not hmac.compare_digest((credentials.password or "").encode(), dashboard_password.encode()):
+            return jsonify(error="Sign in to PasteHappy"), 401, {"WWW-Authenticate": 'Basic realm="PasteHappy", charset="UTF-8"', "Cache-Control": "no-store"}
+        return None
+
+    @app.get("/healthz")
+    def health():
+        return jsonify(status="ok")
 
     @app.get("/api/queue")
     def list_queue():

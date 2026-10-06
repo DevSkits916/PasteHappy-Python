@@ -67,7 +67,7 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 python -m playwright install chromium
 
-npm ci
+npm install
 npm run build
 python app.py
 ```
@@ -79,7 +79,7 @@ If PowerShell blocks the activation script, use the virtual environment directly
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m playwright install chromium
-npm ci
+npm install
 npm run build
 .\.venv\Scripts\python.exe app.py
 ```
@@ -95,7 +95,7 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m playwright install --with-deps chromium
 
-npm ci
+npm install
 npm run build
 python app.py
 ```
@@ -348,7 +348,7 @@ Close other browser instances using the PasteHappy profile, then restart the Pyt
 npm run build
 ```
 
-The Python tests cover CSV normalization, queue persistence and recovery, duplicate handling, state transitions, and API behavior.
+The Python tests cover CSV normalization, queue persistence and recovery, duplicate handling, state transitions, API behavior, membership answers, composer deadlines, and worker continuation. Browser fixture tests use installed Edge/Chrome on Windows or Playwright Chromium; run `python -m playwright install chromium` if no browser is available.
 
 ## Security
 
@@ -364,3 +364,21 @@ The Python tests cover CSV normalization, queue persistence and recovery, duplic
 Created by [DevSkits916](https://github.com/DevSkits916).
 
 Repository: [PasteHappy-Python](https://github.com/DevSkits916/PasteHappy-Python).
+
+## Joining groups, timeout, and worker console
+
+Enable **Join group before posting** to click Join Group before looking for the composer. Enter **Automatic membership answers** as one `question phrase = answer` per line. Matching is case-insensitive; the longest matching phrase wins. For multiple-choice questions use the exact option text. Optional rule acceptance handles checkboxes labelled as agreement/rules. Supported forms include labelled text fields, radio groups, native selects, and checkboxes. The worker fills supported matching questions and submits the join form automatically. It never invents missing answers. Unknown questions, unsupported forms, and administrator approval are recorded as skipped for follow-up. Answers are saved in dashboard browser local storage, not committed to the repository.
+
+**Composer timeout** defaults to 15 seconds (1–120 configurable) and covers both locating the composer trigger and opening its text field. A timeout skips the group and continues even with Stop on failure enabled. Security checkpoints still honor the security stop setting. The top **Worker console** shows the latest 500 timestamped events, group names, errors, and delays; updates every two seconds and resets on server restart. Disable Follow latest to read older entries.
+
+See [automation review](docs/automation-review.md) for prioritized findings and suggested features. Agreement answers default to `I agree` in the automation dashboard; edit or add question mappings as needed.
+
+## Hosted Render deployment
+
+The hosted service requires `DASHBOARD_PASSWORD`; sign in with username `pastehappy` and the configured password. The deployment saves initial credentials in an ignored local file under `data/`. Do not commit that file. `/healthz` is public for service health checks; the dashboard and API require authentication. Local source runs remain accessible without a password unless you set this variable.
+
+The free Render service uses headless Chromium and ephemeral storage. Server queue and Facebook session data can be lost during restart, suspension, or redeploy. The manual workspace remains in the user's browser storage. Hosted visible login is unavailable; use the local app for interactive Facebook login and confirmed automation. For durable hosted queues/profiles, upgrade to a service with a persistent disk and configure both data and profile paths on that disk.
+
+The worker uses event-driven visibility/enabled waits with no fixed opening or joining sleeps. Membership checks use the configured composer timeout as their total deadline. Configured inter-job delay/cooldown remain available and can be set to zero.
+
+Clipboard mirroring is optional and off by default because Playwright fills the composer directly. When enabled, the clipboard call runs outside the browser event loop. Stop and Pause interrupt between-job pacing promptly.

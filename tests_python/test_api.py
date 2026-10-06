@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import base64
+from unittest.mock import patch
 from pathlib import Path
 
 from pastehappy.queue_store import QueueStore
@@ -38,6 +40,23 @@ class ApiTests(unittest.TestCase):
         app = create_app(store=store, worker=FakeWorker(), browser=FakeBrowser(), root=root)
         app.testing = True
         self.client = app.test_client()
+
+    def test_hosted_auth_protects_dashboard_and_api(self):
+        root = Path(self.temporary.name)
+        with patch.dict("os.environ", {"DASHBOARD_PASSWORD": "test-password"}):
+            app = create_app(store=QueueStore(root / "auth-queue.json").init(), worker=FakeWorker(), browser=FakeBrowser(), root=root)
+        client = app.test_client()
+        self.assertEqual(client.get("/healthz").status_code, 200)
+        self.assertEqual(client.get("/").status_code, 401)
+        self.assertEqual(client.post("/api/queue/start").status_code, 401)
+        token = base64.b64encode(b"pastehappy:test-password").decode()
+        self.assertEqual(client.get("/api/status", headers={"Authorization": f"Basic {token}"}).status_code, 200)
+        self.assertEqual(client.get("/api/status", headers={"Authorization": "Bearer token"}).status_code, 401)
+
+    def test_render_requires_password(self):
+        with patch.dict("os.environ", {"RENDER": "true", "DASHBOARD_PASSWORD": ""}):
+            with self.assertRaises(RuntimeError):
+                create_app(store=None, worker=None, browser=None, root=Path(self.temporary.name))
 
     def tearDown(self):
         self.temporary.cleanup()
