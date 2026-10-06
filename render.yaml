@@ -14,5 +14,7 @@ services:
         value: 22.16.0
       - key: PLAYWRIGHT_HEADLESS
         value: true
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/src/.playwright-browsers
       - key: DASHBOARD_PASSWORD
         generateValue: true

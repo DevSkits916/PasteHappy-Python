@@ -6,6 +6,7 @@ tsconfig.tsbuildinfo
 .vscode
 data/
 .browser-profile/
+.playwright-browsers/
 playwright-report/
 test-results/
 .env
