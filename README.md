@@ -59,7 +59,7 @@ After a successful visible login, you may close the Playwright browser, enable *
 
 Headless mode cannot complete interactive login, CAPTCHA, two-factor authentication, or checkpoints. It does not bypass Facebook security controls.
 
-## Chrome extension: for exporting Facebook groups CSV
+## Chrome extension: for exporting Facebook groups to a CSV
 
 https://github.com/DevSkits916/FBGroups2CSV
 
