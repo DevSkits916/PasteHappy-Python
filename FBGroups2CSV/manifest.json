@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Facebook Groups Exporter",
+  "version": "4.0.0",
+  "description": "Collect visible Facebook group details and export them as CSV or JSON.",
+  "permissions": ["clipboardWrite"],
+  "host_permissions": [
+    "https://www.facebook.com/*",
+    "https://m.facebook.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.facebook.com/*groups*",
+        "https://m.facebook.com/*groups*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
